@@ -1,7 +1,8 @@
 import com.sun.net.httpserver.HttpServer;
-
 import java.io.OutputStream;
 import java.net.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -15,6 +16,10 @@ public class NodeMain {
         int initialMushrooms = Integer.parseInt(args[2]);
 
         int[] mushrooms = {initialMushrooms};
+        boolean[] snapshotStarted = {false};
+
+        int[] recordedState = {-1};
+        List<String> channelState = new ArrayList<>();
 
         System.out.println(id + " iniciado con " + mushrooms[0] + " 🍄 en puerto " + port);
         sendState(id, mushrooms[0]);
@@ -52,6 +57,32 @@ public class NodeMain {
                 exchange.getResponseBody().close();
             }
         });
+        server.createContext("/marker", exchange -> {
+
+            if ("POST".equals(exchange.getRequestMethod())) {
+
+                if (!snapshotStarted[0]) {
+
+                    snapshotStarted[0] = true;
+
+                    recordedState[0] = mushrooms[0];
+
+                    System.out.println("📸 SNAPSHOT " + id + " = " + recordedState[0]);
+
+                    // reenviar markers
+                    for (String node : nodes) {
+
+                        if (!node.equals(id)) {
+
+                            sendMarker(node, ports.get(node));
+                        }
+                    }
+                }
+
+                exchange.sendResponseHeaders(200, 0);
+                exchange.getResponseBody().close();
+            }
+        });
 
         server.start();
 
@@ -59,6 +90,27 @@ public class NodeMain {
         String[] nodes = {"mario", "luigi", "toad"};
 
         while (true) {
+            ////////////////////////////
+            if (id.equals("mario") && !snapshotStarted[0]) {
+
+                Thread.sleep(10000);
+
+                snapshotStarted[0] = true;
+
+                recordedState[0] = mushrooms[0];
+
+                System.out.println("📸 SNAPSHOT INICIADO EN " + id +
+                        " = " + recordedState[0]);
+
+                for (String node : nodes) {
+
+                    if (!node.equals(id)) {
+
+                        sendMarker(node, ports.get(node));
+                    }
+                }
+            }
+            ////////////////////////////
 
             Thread.sleep(2000);
 
@@ -160,5 +212,27 @@ public class NodeMain {
     } catch (Exception e) {
         e.printStackTrace();
     }
-}
+    }
+    private static void sendMarker(String target, int port) {
+
+    try {
+
+        URL url = new URL("http://localhost:" + port + "/marker");
+
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+
+        conn.setRequestMethod("POST");
+        conn.setDoOutput(true);
+
+        conn.getOutputStream().write("{}".getBytes());
+
+        conn.getInputStream().close();
+
+        System.out.println("📨 MARKER enviado a " + target);
+
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+    }
+
 }
