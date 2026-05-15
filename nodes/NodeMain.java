@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.HashSet;
+import java.util.Set;
 
 public class NodeMain {
 
@@ -17,9 +19,13 @@ public class NodeMain {
 
         int[] mushrooms = {initialMushrooms};
         boolean[] snapshotStarted = {false};
+        boolean[] snapshotTriggered = {false};
 
         int[] recordedState = {-1};
         List<String> channelState = new ArrayList<>();
+        Set<String> markersReceived = new HashSet<>();
+        //System.out.println("📡 MARKER RECIBIDO DESDE: " + sender);
+        //System.out.println("📡 MARKERS: " + markersReceived);
 
         System.out.println(id + " iniciado con " + mushrooms[0] + " 🍄 en puerto " + port);
         sendState(id, mushrooms[0]);
@@ -28,19 +34,32 @@ public class NodeMain {
                 "luigi", 5002,
                 "toad", 5003
         );
+        String[] nodes = {"mario", "luigi", "toad"};
+
 
         // SERVIDOR PARA RECIBIR SETAS
         HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
 
         server.createContext("/receive", exchange -> {
             if ("POST".equals(exchange.getRequestMethod())) {
+                String query = exchange.getRequestURI().getQuery();
 
+                String sender = query.split("=")[1];
+                
                 new Thread(() -> {
                     try {
 
                         Thread.sleep(1200);
 
                         mushrooms[0]++;
+
+                        // 🧺 si snapshot activo -> guardar mensaje en tránsito
+                        if (snapshotStarted[0]&& !markersReceived.contains(sender)) {
+
+                            channelState.add("🍄 from " + sender);
+
+                            System.out.println("🧺 MENSAJE EN TRÁNSITO capturado en "+ id);
+                        }
 
                         sendState(id, mushrooms[0]);
 
@@ -60,6 +79,15 @@ public class NodeMain {
         server.createContext("/marker", exchange -> {
 
             if ("POST".equals(exchange.getRequestMethod())) {
+                String query = exchange.getRequestURI().getQuery();
+
+                String sender = query.split("=")[1];
+
+                System.out.println("📡 MARKER RECIBIDO DESDE: " + sender);
+
+                markersReceived.add(sender);
+
+                System.out.println("📡 MARKERS: " + markersReceived);
 
                 if (!snapshotStarted[0]) {
 
@@ -68,13 +96,15 @@ public class NodeMain {
                     recordedState[0] = mushrooms[0];
 
                     System.out.println("📸 SNAPSHOT " + id + " = " + recordedState[0]);
+                    System.out.println("🧺 CHANNEL STATE " + id + " = "+ channelState);
 
                     // reenviar markers
                     for (String node : nodes) {
 
                         if (!node.equals(id)) {
 
-                            sendMarker(node, ports.get(node));
+                            new Thread(() ->
+                            sendMarker(id, node, ports.get(node))).start();
                         }
                     }
                 }
@@ -87,11 +117,13 @@ public class NodeMain {
         server.start();
 
         Random random = new Random();
-        String[] nodes = {"mario", "luigi", "toad"};
+        
 
         while (true) {
             ////////////////////////////
-            if (id.equals("mario") && !snapshotStarted[0]) {
+            if (id.equals("mario") && !snapshotTriggered[0]) {
+
+                snapshotTriggered[0] = true;
 
                 Thread.sleep(10000);
 
@@ -99,14 +131,15 @@ public class NodeMain {
 
                 recordedState[0] = mushrooms[0];
 
-                System.out.println("📸 SNAPSHOT INICIADO EN " + id +
-                        " = " + recordedState[0]);
+                System.out.println("📸 SNAPSHOT INICIADO EN "
+                        + id + " = " + recordedState[0]);
 
                 for (String node : nodes) {
 
                     if (!node.equals(id)) {
 
-                        sendMarker(node, ports.get(node));
+                        new Thread(() ->
+                        sendMarker(id, node, ports.get(node))).start();
                     }
                 }
             }
@@ -121,7 +154,7 @@ public class NodeMain {
             if (mushrooms[0] <= 0) continue;
 
             
-            boolean success = sendToNode(target, ports.get(target));
+            boolean success = sendToNode(id, target, ports.get(target));
 
             if (!success) {
                 System.out.println(target + " no disponible ");
@@ -139,16 +172,19 @@ public class NodeMain {
     }
 
   
-    private static boolean sendToNode(String target, int port) {
+    private static boolean sendToNode(String from, String target, int port) {
         try {
-            URL url = new URL("http://localhost:" + port + "/receive");
+            URL url = new URL("http://localhost:" + port + "/receive?from=" + from);
 
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
             conn.setDoOutput(true);
             conn.setConnectTimeout(500);
 
-            conn.getOutputStream().write("{}".getBytes());
+            String json = String.format(
+            "{\"from\":\"%s\"}",from);
+
+            conn.getOutputStream().write(json.getBytes());
 
             int responseCode = conn.getResponseCode();
 
@@ -213,17 +249,17 @@ public class NodeMain {
         e.printStackTrace();
     }
     }
-    private static void sendMarker(String target, int port) {
+    private static void sendMarker(String from, String target, int port) {
 
     try {
 
-        URL url = new URL("http://localhost:" + port + "/marker");
+        URL url = new URL("http://localhost:" + port +"/marker?from=" + from);
 
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
         conn.setRequestMethod("POST");
         conn.setDoOutput(true);
-
+        Thread.sleep(3000);
         conn.getOutputStream().write("{}".getBytes());
 
         conn.getInputStream().close();
