@@ -178,22 +178,34 @@ public class NodeMain {
 
                 globalSnapshot.put(node, snapshot);
 
-                System.out.println("🌍 SNAPSHOT GLOBAL ACTUAL = "+ globalSnapshot);
-                System.out.println("🧺 CHANNELS RECIBIDOS = "+ channels);
+                if (globalSnapshot.size() == nodes.length) {
 
-                int total = 0;
+                    System.out.println(
+                        "🌍 SNAPSHOT GLOBAL FINAL = "
+                        + globalSnapshot
+                    );
 
-                for (int value : globalSnapshot.values()) {
+                    System.out.println(
+                        "🧺 CHANNELS RECIBIDOS = "
+                        + channels
+                    );
 
-                    total += value;
+                    int total = 0;
+
+                    for (int value : globalSnapshot.values()) {
+
+                        total += value;
+                    }
+
+                    int channelMushrooms =
+                        channels.split("🍄", -1).length - 1;
+
+                    total += channelMushrooms;
+
+                    System.out.println(
+                        "🍄 TOTAL GLOBAL = " + total
+                    );
                 }
-                int channelMushrooms = channels.split("🍄", -1).length - 1;
-
-                total += channelMushrooms;
-
-                System.out.println(
-                    "🍄 TOTAL GLOBAL = " + total
-                );
 
                 exchange.sendResponseHeaders(200, 0);
                 exchange.getResponseBody().close();
