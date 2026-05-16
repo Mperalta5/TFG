@@ -224,13 +224,13 @@ public class NodeMain {
                         total += value;
                     }
 
-                    /*for (String channelState : globalChannels.values()) {
+                    for (String channelState : globalChannels.values()) {
 
                         int channelMushrooms =
                             channelState.split("🍄", -1).length - 1;
 
                         total += channelMushrooms;
-                    }*/
+                    }
 
                     System.out.println(
                         "🍄 TOTAL GLOBAL = " + total
@@ -296,7 +296,7 @@ public class NodeMain {
             }
             ////////////////////////////
 
-            Thread.sleep(2000);
+            Thread.sleep(1200);
 
             String target = nodes[random.nextInt(nodes.length)];
 
@@ -422,7 +422,7 @@ public class NodeMain {
 
         conn.setRequestMethod("POST");
         conn.setDoOutput(true);
-        Thread.sleep(600);
+        Thread.sleep(500);
         conn.getOutputStream().write("{}".getBytes());
 
         conn.getInputStream().close();
