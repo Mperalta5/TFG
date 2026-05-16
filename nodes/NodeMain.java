@@ -2,6 +2,7 @@ import com.sun.net.httpserver.HttpServer;
 import java.io.OutputStream;
 import java.net.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -19,11 +20,13 @@ public class NodeMain {
 
         int[] mushrooms = {initialMushrooms};
         boolean[] snapshotStarted = {false};
+        boolean[] snapshotCompleted = {false};
         boolean[] snapshotTriggered = {false};
 
         int[] recordedState = {-1};
-        List<String> channelState = new ArrayList<>();
+        Map<String, List<String>> channelStates = new HashMap<>();
         Set<String> markersReceived = new HashSet<>();
+        Map<String, Integer> globalSnapshot = new HashMap<>();
         //System.out.println("📡 MARKER RECIBIDO DESDE: " + sender);
         //System.out.println("📡 MARKERS: " + markersReceived);
 
@@ -35,6 +38,15 @@ public class NodeMain {
                 "toad", 5003
         );
         String[] nodes = {"mario", "luigi", "toad"};
+        for (String node : nodes) {
+
+            if (!node.equals(id)) {
+
+                String channel = node + "->" + id;
+
+                channelStates.put(channel, new ArrayList<>());
+            }
+        }
 
 
         // SERVIDOR PARA RECIBIR SETAS
@@ -54,9 +66,11 @@ public class NodeMain {
                         mushrooms[0]++;
 
                         // 🧺 si snapshot activo -> guardar mensaje en tránsito
-                        if (snapshotStarted[0]&& !markersReceived.contains(sender)) {
+                        String channel = sender + "->" + id;
+                        if (snapshotStarted[0]&& !markersReceived.contains(channel)){
 
-                            channelState.add("🍄 from " + sender);
+                            //String channel = sender + "->" + id;
+                            channelStates.get(channel).add("🍄");
 
                             System.out.println("🧺 MENSAJE EN TRÁNSITO capturado en "+ id);
                         }
@@ -70,7 +84,7 @@ public class NodeMain {
                     }
                 }).start();
 
-                System.out.println(id + " recibió 🍄 → ahora tiene: " + mushrooms[0]);
+                //System.out.println(id + " recibió 🍄 → ahora tiene: " + mushrooms[0]);
 
                 exchange.sendResponseHeaders(200, 0);
                 exchange.getResponseBody().close();
@@ -85,19 +99,30 @@ public class NodeMain {
 
                 System.out.println("📡 MARKER RECIBIDO DESDE: " + sender);
 
-                markersReceived.add(sender);
+                String channel = sender + "->" + id;
 
-                System.out.println("📡 MARKERS: " + markersReceived);
+                //markersReceived.add(channel);
+
+                //System.out.println("📡 MARKERS: " + markersReceived);
+
+                // ✅ comprobar si snapshot terminó
+
+                
 
                 if (!snapshotStarted[0]) {
+                    markersReceived.clear();
+
+                    for (List<String> channels : channelStates.values()) {
+                        channels.clear();
+                    }
+
+                    snapshotCompleted[0] = false;
 
                     snapshotStarted[0] = true;
 
                     recordedState[0] = mushrooms[0];
 
                     System.out.println("📸 SNAPSHOT " + id + " = " + recordedState[0]);
-                    System.out.println("🧺 CHANNEL STATE " + id + " = "+ channelState);
-
                     // reenviar markers
                     for (String node : nodes) {
 
@@ -108,11 +133,73 @@ public class NodeMain {
                         }
                     }
                 }
+                markersReceived.add(channel);
+
+                System.out.println("📡 MARKERS: " + markersReceived);
+                if (!snapshotCompleted[0] && markersReceived.size() == channelStates.size()) {
+
+                    snapshotCompleted[0] = true;
+                    snapshotStarted[0] = false;
+
+                    System.out.println("✅ SNAPSHOT COMPLETADO EN " + id);
+
+                    System.out.println("📸 ESTADO FINAL = " + recordedState[0]);
+
+                    System.out.println("🧺 CANALES FINALES = " + channelStates);
+
+                    sendSnapshotToInitiator(id,recordedState[0],channelStates);
+                }
 
                 exchange.sendResponseHeaders(200, 0);
                 exchange.getResponseBody().close();
             }
         });
+        server.createContext("/snapshot", exchange -> {
+
+            if ("POST".equals(exchange.getRequestMethod())) {
+
+                String body = new String(
+                    exchange.getRequestBody().readAllBytes()
+                );
+
+                String node =
+                    body.split("\"node\":\"")[1]
+                        .split("\"")[0];
+
+                int snapshot =
+                    Integer.parseInt(
+                        body.split("\"snapshot\":")[1]
+                            .split(",")[0]
+                );
+                String channels =
+                    body.split("\"channels\":\"")[1]
+                        .split("\"")[0]
+                        .replace("'", "\"");
+
+                globalSnapshot.put(node, snapshot);
+
+                System.out.println("🌍 SNAPSHOT GLOBAL ACTUAL = "+ globalSnapshot);
+                System.out.println("🧺 CHANNELS RECIBIDOS = "+ channels);
+
+                int total = 0;
+
+                for (int value : globalSnapshot.values()) {
+
+                    total += value;
+                }
+                int channelMushrooms = channels.split("🍄", -1).length - 1;
+
+                total += channelMushrooms;
+
+                System.out.println(
+                    "🍄 TOTAL GLOBAL = " + total
+                );
+
+                exchange.sendResponseHeaders(200, 0);
+                exchange.getResponseBody().close();
+            }
+        });
+        server.setExecutor(java.util.concurrent.Executors.newCachedThreadPool());
 
         server.start();
 
@@ -127,19 +214,39 @@ public class NodeMain {
 
                 Thread.sleep(10000);
 
+                markersReceived.clear();
+
+                for (List<String> channels : channelStates.values()) {
+                    channels.clear();
+                }
+
+                snapshotCompleted[0] = false;
+
                 snapshotStarted[0] = true;
 
                 recordedState[0] = mushrooms[0];
 
-                System.out.println("📸 SNAPSHOT INICIADO EN "
-                        + id + " = " + recordedState[0]);
+                /*for (String node : nodes) {
+
+                    if (!node.equals(id)) {
+
+                        String channel = node + "->" + id;
+
+                        markersReceived.add(channel);
+                    }
+                }*/
+
+                System.out.println("📸 SNAPSHOT INICIADO EN "+ id + " = " + recordedState[0]);
+
+                globalSnapshot.put(id, recordedState[0]);
 
                 for (String node : nodes) {
 
                     if (!node.equals(id)) {
 
                         new Thread(() ->
-                        sendMarker(id, node, ports.get(node))).start();
+                            sendMarker(id, node, ports.get(node))
+                        ).start();
                     }
                 }
             }
@@ -269,6 +376,36 @@ public class NodeMain {
     } catch (Exception e) {
         e.printStackTrace();
     }
+    }
+    private static void sendSnapshotToInitiator(String node, int snapshot, Map<String, List<String>> channels) {
+
+        try {
+
+            URL url = new URL(
+                "http://localhost:5001/snapshot"
+            );
+
+            HttpURLConnection conn =
+                (HttpURLConnection) url.openConnection();
+
+            conn.setRequestMethod("POST");
+            conn.setDoOutput(true);
+
+            String json = String.format(
+                "{\"node\":\"%s\",\"snapshot\":%d,\"channels\":\"%s\"}",
+                node,
+                snapshot,
+                channels.toString().replace("\"", "'")
+            );
+
+            conn.getOutputStream().write(json.getBytes());
+
+            conn.getInputStream().close();
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+        }
     }
 
 }
