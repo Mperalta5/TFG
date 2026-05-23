@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.Random;
 import java.util.HashSet;
 import java.util.Set;
+import java.io.FileWriter;
+import java.io.PrintWriter;
 
 public class NodeMain {
 
@@ -21,14 +23,18 @@ public class NodeMain {
         int[] mushrooms = {initialMushrooms};
         boolean[] snapshotStarted = {false};
         boolean[] snapshotCompleted = {false};
-        boolean[] snapshotTriggered = {false};
+        //boolean[] snapshotTriggered = {false};
         boolean[] globalSnapshotPrinted = {false};
+        long[] currentSnapshotId = {0};
 
         int[] recordedState = {-1};
         Map<String, List<String>> channelStates = new HashMap<>();
         Set<String> markersReceived = new HashSet<>();
         Map<String, Integer> globalSnapshot = new HashMap<>();
         Map<String, String> globalChannels = new HashMap<>();
+        Set<String> closedChannels = new HashSet<>();
+        try (PrintWriter snapshotWriter = new PrintWriter(
+                new FileWriter("snapshot_global2.txt", true))) {
         //System.out.println("📡 MARKER RECIBIDO DESDE: " + sender);
         //System.out.println("📡 MARKERS: " + markersReceived);
 
@@ -135,8 +141,15 @@ public class NodeMain {
 
                         if (!node.equals(id)) {
 
-                            new Thread(() ->
-                            sendMarker(id, node, ports.get(node))).start();
+                            closedChannels.add(node);
+
+                            new Thread(() -> {
+
+                                sendMarker(id, node, ports.get(node));
+
+                                closedChannels.remove(node);
+
+                            }).start();
                         }
                     }
                 }
@@ -173,6 +186,14 @@ public class NodeMain {
                             id,
                             channelStates.toString()
                         );
+
+                        printGlobalSnapshot(
+                            nodes,
+                            globalSnapshot,
+                            globalChannels,
+                            globalSnapshotPrinted,
+                            snapshotWriter
+                        );
                     }
                 }
 
@@ -205,37 +226,13 @@ public class NodeMain {
                 globalSnapshot.put(node, snapshot);
                 globalChannels.put(node, channels);
 
-                if (!globalSnapshotPrinted[0] &&globalSnapshot.size() == nodes.length &&globalChannels.size() == nodes.length) {
-                    globalSnapshotPrinted[0] = true;
-                    System.out.println(
-                        "🌍 SNAPSHOT GLOBAL FINAL = "
-                        + globalSnapshot
-                    );
-
-                    System.out.println(
-                        "🧺 TODOS LOS CANALES = "
-                        + globalChannels
-                    );
-
-                    int total = 0;
-
-                    for (int value : globalSnapshot.values()) {
-
-                        total += value;
-                    }
-
-                    for (String channelState : globalChannels.values()) {
-
-                        int channelMushrooms =
-                            channelState.split("🍄", -1).length - 1;
-
-                        total += channelMushrooms;
-                    }
-
-                    System.out.println(
-                        "🍄 TOTAL GLOBAL = " + total
-                    );
-                }
+                printGlobalSnapshot(
+                    nodes,
+                    globalSnapshot,
+                    globalChannels,
+                    globalSnapshotPrinted,
+                    snapshotWriter
+                );
 
                 exchange.sendResponseHeaders(200, 0);
                 exchange.getResponseBody().close();
@@ -246,65 +243,58 @@ public class NodeMain {
         server.start();
 
         Random random = new Random();
-        
+
+        // Mario snapshot trigger as a background thread
+        if (id.equals("mario")) {
+            new Thread(() -> {
+                while (true) {
+                    try {
+                        Thread.sleep(15000);
+                        if (snapshotStarted[0]) {
+                            continue;
+                        }
+                        markersReceived.clear();
+                        for (List<String> channels : channelStates.values()) {
+                            channels.clear();
+                        }
+                        snapshotCompleted[0] = false;
+                        snapshotStarted[0] = true;
+                        globalSnapshotPrinted[0] = false;
+                        globalSnapshot.clear();
+                        globalChannels.clear();
+                        currentSnapshotId[0]++;
+                        recordedState[0] = mushrooms[0];
+                        System.out.println(
+                            "📸 SNAPSHOT INICIADO EN "
+                            + id + " = " + recordedState[0]
+                        );
+                        for (String node : nodes) {
+                            if (!node.equals(id)) {
+                                closedChannels.add(node);
+                                new Thread(() -> {
+                                    sendMarker(id, node, ports.get(node));
+                                    closedChannels.remove(node);
+                                }).start();
+                            }
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }).start();
+        }
 
         while (true) {
-            ////////////////////////////
-            if (id.equals("mario") && !snapshotTriggered[0]) {
-
-                snapshotTriggered[0] = true;
-
-                Thread.sleep(10000);
-
-                markersReceived.clear();
-
-                for (List<String> channels : channelStates.values()) {
-                    channels.clear();
-                }
-
-                snapshotCompleted[0] = false;
-
-                snapshotStarted[0] = true;
-                globalSnapshotPrinted[0] = false;
-
-                recordedState[0] = mushrooms[0];
-
-                /*for (String node : nodes) {
-
-                    if (!node.equals(id)) {
-
-                        String channel = node + "->" + id;
-
-                        markersReceived.add(channel);
-                    }
-                }*/
-
-                System.out.println("📸 SNAPSHOT INICIADO EN "+ id + " = " + recordedState[0]);
-
-                //globalSnapshot.put(id, recordedState[0]);
-                //globalChannels.put(id, channelStates.toString());
-
-                for (String node : nodes) {
-
-                    if (!node.equals(id)) {
-
-                        new Thread(() ->
-                            sendMarker(id, node, ports.get(node))
-                        ).start();
-                    }
-                }
-            }
-            ////////////////////////////
-
             Thread.sleep(1200);
 
             String target = nodes[random.nextInt(nodes.length)];
+
+            if (closedChannels.contains(target)) continue;
 
             if (target.equals(id)) continue;
 
             if (mushrooms[0] <= 0) continue;
 
-            
             mushrooms[0]--;
 
             sendState(id, mushrooms[0]);
@@ -313,13 +303,9 @@ public class NodeMain {
                 sendToNode(id, target, ports.get(target));
 
             if (!success) {
-
                 mushrooms[0]++;
-
                 sendState(id, mushrooms[0]);
-
                 System.out.println(target + " no disponible ");
-
                 continue;
             }
 
@@ -333,8 +319,77 @@ public class NodeMain {
             );
         }
     }
+    }
 
   
+    private static void printGlobalSnapshot(
+        String[] nodes,
+        Map<String, Integer> globalSnapshot,
+        Map<String, String> globalChannels,
+        boolean[] globalSnapshotPrinted,
+        PrintWriter snapshotWriter
+    ) {
+
+        if (globalSnapshotPrinted[0]) {
+            return;
+        }
+
+        if (globalSnapshot.size() != nodes.length
+            || globalChannels.size() != nodes.length) {
+            return;
+        }
+
+        globalSnapshotPrinted[0] = true;
+
+        System.out.println(
+            "🌍 SNAPSHOT GLOBAL FINAL = "
+            + globalSnapshot
+        );
+
+        System.out.println(
+            "🧺 TODOS LOS CANALES = "
+            + globalChannels
+        );
+
+        snapshotWriter.println(
+            "🌍 SNAPSHOT GLOBAL FINAL = "
+            + globalSnapshot
+        );
+
+        snapshotWriter.println(
+            "🧺 TODOS LOS CANALES = "
+            + globalChannels
+        );
+
+        int total = 0;
+
+        for (int value : globalSnapshot.values()) {
+            total += value;
+        }
+
+        for (String channelState : globalChannels.values()) {
+
+            int channelMushrooms =
+                channelState.split("🍄", -1).length - 1;
+
+            total += channelMushrooms;
+        }
+
+        System.out.println(
+            "🍄 TOTAL GLOBAL = " + total
+        );
+
+        snapshotWriter.println(
+            "🍄 TOTAL GLOBAL = " + total
+        );
+
+        snapshotWriter.println(
+            "-----------------------------------"
+        );
+
+        snapshotWriter.flush();
+    }
+
     private static boolean sendToNode(String from, String target, int port) {
         try {
             URL url = new URL("http://localhost:" + port + "/receive?from=" + from);
@@ -422,7 +477,7 @@ public class NodeMain {
 
         conn.setRequestMethod("POST");
         conn.setDoOutput(true);
-        Thread.sleep(500);
+        Thread.sleep(600);
         conn.getOutputStream().write("{}".getBytes());
 
         conn.getInputStream().close();

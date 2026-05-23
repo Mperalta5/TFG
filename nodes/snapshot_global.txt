@@ -1,0 +1,104 @@
+🌍 SNAPSHOT GLOBAL FINAL = {toad=16, mario=37, luigi=12}
+🧺 TODOS LOS CANALES = {toad={mario->toad=[], luigi->toad=[]}, mario={toad->mario=[], luigi->mario=[]}, luigi={toad->luigi=[], mario->luigi=[]}}
+🍄 TOTAL GLOBAL = 65
+-----------------------------------
+🌍 SNAPSHOT GLOBAL FINAL = {toad=13, mario=38, luigi=14}
+🧺 TODOS LOS CANALES = {toad={mario->toad=[], luigi->toad=[]}, mario={toad->mario=[], luigi->mario=[]}, luigi={toad->luigi=[], mario->luigi=[]}}
+🍄 TOTAL GLOBAL = 65
+-----------------------------------
+🌍 SNAPSHOT GLOBAL FINAL = {toad=17, mario=36, luigi=12}
+🧺 TODOS LOS CANALES = {toad={mario->toad=[], luigi->toad=[]}, mario={toad->mario=[], luigi->mario=[]}, luigi={toad->luigi=[], mario->luigi=[]}}
+🍄 TOTAL GLOBAL = 65
+-----------------------------------
+🌍 SNAPSHOT GLOBAL FINAL = {toad=16, mario=32, luigi=15}
+🧺 TODOS LOS CANALES = {toad={mario->toad=[], luigi->toad=[🍄]}, mario={toad->mario=[🍄], luigi->mario=[]}, luigi={toad->luigi=[], mario->luigi=[]}}
+🍄 TOTAL GLOBAL = 65
+-----------------------------------
+🌍 SNAPSHOT GLOBAL FINAL = {toad=19, mario=38, luigi=11}
+🧺 TODOS LOS CANALES = {toad={mario->toad=[], luigi->toad=[]}, mario={toad->mario=[], luigi->mario=[]}, luigi={toad->luigi=[], mario->luigi=[]}}
+🍄 TOTAL GLOBAL = 68
+-----------------------------------
+🌍 SNAPSHOT GLOBAL FINAL = {toad=13, mario=40, luigi=11}
+🧺 TODOS LOS CANALES = {toad={mario->toad=[], luigi->toad=[]}, mario={toad->mario=[🍄], luigi->mario=[]}, luigi={toad->luigi=[], mario->luigi=[]}}
+🍄 TOTAL GLOBAL = 65
+-----------------------------------
+🌍 SNAPSHOT GLOBAL FINAL = {toad=13, mario=40, luigi=11}
+🧺 TODOS LOS CANALES = {toad={mario->toad=[], luigi->toad=[]}, mario={toad->mario=[🍄], luigi->mario=[]}, luigi={toad->luigi=[], mario->luigi=[]}}
+🍄 TOTAL GLOBAL = 65
+-----------------------------------
+🌍 SNAPSHOT GLOBAL FINAL = {toad=13, mario=48, luigi=4}
+🧺 TODOS LOS CANALES = {toad={mario->toad=[], luigi->toad=[]}, mario={toad->mario=[🍄], luigi->mario=[]}, luigi={toad->luigi=[], mario->luigi=[]}}
+🍄 TOTAL GLOBAL = 66
+-----------------------------------
+🌍 SNAPSHOT GLOBAL FINAL = {toad=12, mario=48, luigi=5}
+🧺 TODOS LOS CANALES = {toad={mario->toad=[], luigi->toad=[]}, mario={toad->mario=[🍄], luigi->mario=[]}, luigi={toad->luigi=[], mario->luigi=[]}}
+🍄 TOTAL GLOBAL = 66
+-----------------------------------
+🌍 SNAPSHOT GLOBAL FINAL = {toad=3, mario=59, luigi=3}
+🧺 TODOS LOS CANALES = {toad={mario->toad=[], luigi->toad=[]}, mario={toad->mario=[], luigi->mario=[]}, luigi={toad->luigi=[], mario->luigi=[]}}
+🍄 TOTAL GLOBAL = 65
+-----------------------------------
+🌍 SNAPSHOT GLOBAL FINAL = {toad=3, mario=62, luigi=3}
+🧺 TODOS LOS CANALES = {toad={mario->toad=[], luigi->toad=[]}, mario={toad->mario=[], luigi->mario=[]}, luigi={toad->luigi=[], mario->luigi=[]}}
+🍄 TOTAL GLOBAL = 68
+-----------------------------------
+🌍 SNAPSHOT GLOBAL FINAL = {toad=0, mario=65, luigi=0}
+🧺 TODOS LOS CANALES = {toad={mario->toad=[], luigi->toad=[]}, mario={toad->mario=[], luigi->mario=[]}, luigi={toad->luigi=[], mario->luigi=[]}}
+🌍 SNAPSHOT GLOBAL FINAL = {toad=0, mario=65, luigi=0}
+🧺 TODOS LOS CANALES = {toad={mario->toad=[], luigi->toad=[]}, mario={toad->mario=[], luigi->mario=[]}, luigi={toad->luigi=[], mario->luigi=[]}}
+🍄 TOTAL GLOBAL = 65
+-----------------------------------
+🍄 TOTAL GLOBAL = 65
+-----------------------------------
+🌍 SNAPSHOT GLOBAL FINAL = {toad=0, mario=65, luigi=0}
+🧺 TODOS LOS CANALES = {toad={mario->toad=[], luigi->toad=[]}, mario={toad->mario=[], luigi->mario=[]}, luigi={toad->luigi=[], mario->luigi=[]}}
+🍄 TOTAL GLOBAL = 65
+-----------------------------------
+🌍 SNAPSHOT GLOBAL FINAL = {toad=0, mario=65, luigi=0}
+🧺 TODOS LOS CANALES = {toad={mario->toad=[], luigi->toad=[]}, mario={toad->mario=[], luigi->mario=[]}, luigi={toad->luigi=[], mario->luigi=[]}}
+🍄 TOTAL GLOBAL = 65
+-----------------------------------
+🌍 SNAPSHOT GLOBAL FINAL = {toad=0, mario=65, luigi=0}
+🧺 TODOS LOS CANALES = {toad={mario->toad=[], luigi->toad=[]}, mario={toad->mario=[], luigi->mario=[]}, luigi={toad->luigi=[], mario->luigi=[]}}
+🍄 TOTAL GLOBAL = 65
+-----------------------------------
+🌍 SNAPSHOT GLOBAL FINAL = {toad=0, mario=65, luigi=0}
+🧺 TODOS LOS CANALES = {toad={mario->toad=[], luigi->toad=[]}, mario={toad->mario=[], luigi->mario=[]}, luigi={toad->luigi=[], mario->luigi=[]}}
+🍄 TOTAL GLOBAL = 65
+-----------------------------------
+🌍 SNAPSHOT GLOBAL FINAL = {toad=0, mario=65, luigi=0}
+🧺 TODOS LOS CANALES = {toad={mario->toad=[], luigi->toad=[]}, mario={toad->mario=[], luigi->mario=[]}, luigi={toad->luigi=[], mario->luigi=[]}}
+🍄 TOTAL GLOBAL = 65
+-----------------------------------
+🌍 SNAPSHOT GLOBAL FINAL = {toad=0, mario=65, luigi=0}
+🧺 TODOS LOS CANALES = {toad={mario->toad=[], luigi->toad=[]}, mario={toad->mario=[], luigi->mario=[]}, luigi={toad->luigi=[], mario->luigi=[]}}
+🍄 TOTAL GLOBAL = 65
+-----------------------------------
+🌍 SNAPSHOT GLOBAL FINAL = {toad=0, mario=65, luigi=0}
+🧺 TODOS LOS CANALES = {toad={mario->toad=[], luigi->toad=[]}, mario={toad->mario=[], luigi->mario=[]}, luigi={toad->luigi=[], mario->luigi=[]}}
+🍄 TOTAL GLOBAL = 65
+-----------------------------------
+🌍 SNAPSHOT GLOBAL FINAL = {toad=0, mario=65, luigi=0}
+🧺 TODOS LOS CANALES = {toad={mario->toad=[], luigi->toad=[]}, mario={toad->mario=[], luigi->mario=[]}, luigi={toad->luigi=[], mario->luigi=[]}}
+🌍 SNAPSHOT GLOBAL FINAL = {toad=0, mario=65, luigi=0}
+🧺 TODOS LOS CANALES = {toad={mario->toad=[], luigi->toad=[]}, mario={toad->mario=[], luigi->mario=[]}, luigi={toad->luigi=[], mario->luigi=[]}}
+🍄 TOTAL GLOBAL = 65
+-----------------------------------
+🍄 TOTAL GLOBAL = 65
+-----------------------------------
+🌍 SNAPSHOT GLOBAL FINAL = {toad=12, mario=46, luigi=7}
+🧺 TODOS LOS CANALES = {toad={mario->toad=[], luigi->toad=[]}, mario={toad->mario=[], luigi->mario=[]}, luigi={toad->luigi=[], mario->luigi=[]}}
+🍄 TOTAL GLOBAL = 65
+-----------------------------------
+🌍 SNAPSHOT GLOBAL FINAL = {toad=0, mario=65, luigi=0}
+🧺 TODOS LOS CANALES = {toad={mario->toad=[], luigi->toad=[]}, mario={toad->mario=[], luigi->mario=[]}, luigi={toad->luigi=[], mario->luigi=[]}}
+🍄 TOTAL GLOBAL = 65
+-----------------------------------
+🌍 SNAPSHOT GLOBAL FINAL = {toad=0, mario=65, luigi=0}
+🧺 TODOS LOS CANALES = {toad={mario->toad=[], luigi->toad=[]}, mario={toad->mario=[], luigi->mario=[]}, luigi={toad->luigi=[], mario->luigi=[]}}
+🍄 TOTAL GLOBAL = 65
+-----------------------------------
+🌍 SNAPSHOT GLOBAL FINAL = {toad=11, mario=54, luigi=0}
+🧺 TODOS LOS CANALES = {toad={mario->toad=[], luigi->toad=[]}, mario={toad->mario=[], luigi->mario=[]}, luigi={toad->luigi=[], mario->luigi=[]}}
+🍄 TOTAL GLOBAL = 65
+-----------------------------------
