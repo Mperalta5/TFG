@@ -3,11 +3,34 @@ const ctx = canvas.getContext("2d");
 
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
+const marioImage = new Image();
+marioImage.src = "public/mario.png?v=1";
+
+const luigiImage = new Image();
+luigiImage.src = "public/luigi.png?v=1";
+
+const toadImage = new Image();
+toadImage.src = "public/toad.png?v=1";
 
 const nodes = {
-    mario: { x: 500, y: 120, color: "#ff4d4d" },
-    luigi: { x: 250, y: 450, color: "#4dff88" },
-    toad:  { x: 750, y: 450, color: "#4da6ff" }
+
+    mario: {
+        x: 500,
+        y: 120,
+        image: marioImage
+    },
+
+    luigi: {
+        x: 250,
+        y: 450,
+        image: luigiImage
+    },
+
+    toad: {
+        x: 750,
+        y: 450,
+        image: toadImage
+    }
 };
 
 const channels = [
@@ -21,6 +44,9 @@ const channels = [
     ["toad", "luigi"]
 ];
 const movingObjects = [];
+const mushroomImage = new Image();
+
+mushroomImage.src = "public/carta.png";
 
 const socket = new SockJS("http://localhost:8080/ws");
 
@@ -34,13 +60,31 @@ stompClient.connect({}, () => {
 
         const event = JSON.parse(message.body);
 
-        console.log("Evento recibido:", event);
+        console.log(
+            "TIPO:",
+            event.type,
+            event
+        );
 
-        // evento envío seta
-        if (event.from && event.to) {
+        // ignorar estados
+        if (!event.type) {
+            return;
+        }
+
+        if (event.type === "mushroom") {
 
             movingObjects.push({
                 type: "mushroom",
+                from: event.from,
+                to: event.to,
+                progress: 0
+            });
+        }
+
+        if (event.type === "marker") {
+
+            movingObjects.push({
+                type: "marker",
                 from: event.from,
                 to: event.to,
                 progress: 0
@@ -59,21 +103,25 @@ stompClient.connect({}, () => {
 
 function drawNode(name, node) {
 
-    ctx.beginPath();
-    ctx.arc(node.x, node.y, 45, 0, Math.PI * 2);
-
-    ctx.fillStyle = node.color;
-    ctx.fill();
-
-    ctx.strokeStyle = "white";
-    ctx.lineWidth = 3;
-    ctx.stroke();
+    ctx.drawImage(
+        node.image,
+        node.x - 50,
+        node.y - 50,
+        100,
+        100
+    );
 
     ctx.fillStyle = "white";
+
     ctx.font = "20px Arial";
+
     ctx.textAlign = "center";
 
-    ctx.fillText(name, node.x, node.y + 7);
+    ctx.fillText(
+        name,
+        node.x,
+        node.y + 75
+    );
 }
 
 function drawArrow(from, to) {
@@ -145,7 +193,7 @@ function drawArrow(from, to) {
     ctx.fillStyle = "#777";
     ctx.fill();
 }
-function drawMovingObject(obj) {
+/*function drawMovingObject(obj) {
 
     const start = nodes[obj.from];
     const end = nodes[obj.to];
@@ -156,7 +204,7 @@ function drawMovingObject(obj) {
     const y =
         start.y + (end.y - start.y) * obj.progress;
 
-    ctx.beginPath();
+    /*ctx.beginPath();
 
     ctx.arc(x, y, 12, 0, Math.PI * 2);
 
@@ -167,7 +215,50 @@ function drawMovingObject(obj) {
     }
 
     ctx.fill();
+////////////////////
+    if (obj.type === "mushroom") {
 
+        ctx.beginPath();
+
+        ctx.arc(x, y, 12, 0, Math.PI * 2);
+
+        ctx.fillStyle = "#ff9933";
+
+        ctx.fill();
+
+    } else if (obj.type === "marker") {
+
+        ctx.fillStyle = "#999";
+
+        ctx.fillRect(
+
+            x - 10,
+
+            y - 10,
+
+            20,
+
+            20
+
+        );
+
+        ctx.strokeStyle = "#ddd";
+
+        ctx.lineWidth = 2;
+
+        ctx.strokeRect(
+
+            x - 10,
+
+            y - 10,
+
+            20,
+
+            20
+
+        );
+
+    }
     obj.progress += 0.005;
 
     if (obj.progress > 1) {
@@ -175,6 +266,68 @@ function drawMovingObject(obj) {
     const index = movingObjects.indexOf(obj);
 
         if (index > -1) {
+            movingObjects.splice(index, 1);
+        }
+    }
+}*/
+function drawMovingObject(obj) {
+
+    console.log("DRAW TYPE:", obj.type);
+
+    const start = nodes[obj.from];
+    const end = nodes[obj.to];
+
+    const x =
+        start.x + (end.x - start.x) * obj.progress;
+
+    const y =
+        start.y + (end.y - start.y) * obj.progress;
+
+    // MARKER
+    if (String(obj.type).trim() === "marker") {
+
+        ctx.fillStyle = "#b31414";
+
+        ctx.fillRect(
+            x - 10,
+            y - 10,
+            20,
+            20
+        );
+
+        ctx.strokeStyle = "#ddd";
+
+        ctx.lineWidth = 2;
+
+        ctx.strokeRect(
+            x - 10,
+            y - 10,
+            20,
+            20
+        );
+    }
+
+    // MUSHROOM
+    else {
+
+        ctx.drawImage(
+            mushroomImage,
+            x - 16,
+            y - 16,
+            32,
+            32
+        );
+    }
+
+    obj.progress += 0.005;
+
+    if (obj.progress > 1) {
+
+        const index =
+            movingObjects.indexOf(obj);
+
+        if (index > -1) {
+
             movingObjects.splice(index, 1);
         }
     }

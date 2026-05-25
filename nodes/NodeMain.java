@@ -309,7 +309,7 @@ public class NodeMain {
                 continue;
             }
 
-            sendEvent(id, target, mushrooms[0]);
+            sendVisualEvent("mushroom", id, target);
 
             System.out.println(
                 id + " envía 🍄 a "
@@ -414,7 +414,7 @@ public class NodeMain {
     }
 
     //  ENVÍA EVENTO AL VISUALIZER
-    private static void sendEvent(String from, String to, int mushrooms) {
+    /*private static void sendEvent(String from, String to, int mushrooms) {
         try {
             URL url = new URL("http://localhost:8080/event");
 
@@ -435,6 +435,45 @@ public class NodeMain {
             conn.getInputStream().close();
 
         } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }*/
+    private static void sendVisualEvent(String type, String from, String to) {
+        try {
+
+            URL url = new URL(
+                "http://localhost:8080/event"
+            );
+
+            HttpURLConnection conn =
+                (HttpURLConnection) url.openConnection();
+
+            conn.setRequestMethod("POST");
+            conn.setDoOutput(true);
+
+            conn.setRequestProperty(
+                "Content-Type",
+                "application/json"
+            );
+
+            String json = String.format(
+                "{\"type\":\"%s\",\"from\":\"%s\",\"to\":\"%s\"}",
+                type,
+                from,
+                to
+            );
+
+            try (OutputStream os = conn.getOutputStream()) {
+
+                os.write(json.getBytes());
+
+                os.flush();
+            }
+
+            conn.getInputStream().close();
+
+        } catch (Exception e) {
+
             e.printStackTrace();
         }
     }
@@ -477,7 +516,22 @@ public class NodeMain {
 
         conn.setRequestMethod("POST");
         conn.setDoOutput(true);
+        System.out.println(
+            "ENVIANDO MARKER VISUAL -> "
+            + from
+            + " -> "
+            + target
+        );
+
+        sendVisualEvent(
+            "marker",
+            from,
+            target
+        );
+        //sendVisualEvent("marker", from, target);
+
         Thread.sleep(600);
+
         conn.getOutputStream().write("{}".getBytes());
 
         conn.getInputStream().close();
