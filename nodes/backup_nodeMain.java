@@ -186,11 +186,6 @@ public class NodeMain {
                         synchronized (mushrooms) {
 
                             recordedState[0] = mushrooms[0];
-
-                            sendSnapshotState(
-                                id,
-                                recordedState[0]
-                            );
                         }
 
                         System.out.println(
@@ -531,11 +526,6 @@ public class NodeMain {
         synchronized (mushrooms) {
 
             recordedState[0] = mushrooms[0];
-
-            sendSnapshotState(
-                id,
-                recordedState[0]
-            );
         }
 
         System.out.println(
@@ -896,45 +886,6 @@ public class NodeMain {
 
                 os.flush();
             }
-
-            conn.getInputStream().close();
-
-        } catch(Exception e) {
-
-            e.printStackTrace();
-        }
-    }
-    private static void sendSnapshotState(String node,int snapshot) {
-
-        try {
-
-            URL url =
-                new URL(
-                    "http://localhost:8080/event"
-                );
-
-            HttpURLConnection conn =
-                (HttpURLConnection)
-                url.openConnection();
-
-            conn.setRequestMethod("POST");
-
-            conn.setDoOutput(true);
-
-            conn.setRequestProperty(
-                "Content-Type",
-                "application/json"
-            );
-
-            String json =
-                String.format(
-                    "{\"type\":\"snapshotState\",\"node\":\"%s\",\"snapshot\":%d}",
-                    node,
-                    snapshot
-                );
-
-            conn.getOutputStream()
-                .write(json.getBytes());
 
             conn.getInputStream().close();
 

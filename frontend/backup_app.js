@@ -18,24 +18,21 @@ const nodes = {
         x: canvas.width / 2,
         y: 140,
         image: marioImage,
-        mushrooms: 0,
-        snapshot: null
+        mushrooms: 0
     },
 
     luigi: {
         x: 180,
         y: canvas.height - 230,
         image: luigiImage,
-        mushrooms: 0,
-        snapshot: null
+        mushrooms: 0
     },
 
     toad: {
         x: canvas.width - 180,
         y: canvas.height - 230,
         image: toadImage,
-        mushrooms: 0,
-        snapshot: null
+        mushrooms: 0
     }
 };
 
@@ -51,7 +48,7 @@ const channels = [
 ];
 const movingObjects = [];
 let snapshotText = "";
-//const pendingStates = [];
+const pendingStates = [];
 const mushroomImage = new Image();
 
 mushroomImage.src = "public/carta.png";
@@ -81,10 +78,19 @@ stompClient.connect({}, () => {
         }
 
         // actualizar estado nodo
-        if (event.node &&event.mushrooms != null) {
+        if (
+            event.node &&
+            event.mushrooms != null
+        ) {
 
-            nodes[event.node].mushrooms =
-                Number(event.mushrooms);
+            pendingStates.push({
+
+                node: event.node,
+
+                mushrooms: Number(event.mushrooms),
+
+                applyAt: Date.now() + 3500
+            });
 
             return;
         }
@@ -101,7 +107,7 @@ stompClient.connect({}, () => {
         }
 
         // marker visual
-        else if (event.type === "marker") {
+        if (event.type === "marker") {
 
             movingObjects.push({
                 type: "marker",
@@ -109,13 +115,6 @@ stompClient.connect({}, () => {
                 to: event.to,
                 progress: 0
             });
-        }
-        else if (
-            event.type === "snapshotState"
-        ) {
-
-            nodes[event.node].snapshot =
-                event.snapshot;
         }
     });
 });
@@ -137,40 +136,7 @@ function drawNode(name, node) {
         100,
         100
     );
-    if (node.snapshot !== null) {
 
-        ctx.beginPath();
-
-        ctx.arc(
-            node.x + 55,
-            node.y - 55,
-            20,
-            0,
-            Math.PI * 2
-        );
-
-        ctx.fillStyle = "#1f5cff";
-
-        ctx.fill();
-
-        ctx.strokeStyle = "white";
-
-        ctx.lineWidth = 2;
-
-        ctx.stroke();
-
-        ctx.fillStyle = "white";
-
-        ctx.font = "16px Arial";
-
-        ctx.textAlign = "center";
-
-        ctx.fillText(
-            node.snapshot,
-            node.x + 55,
-            node.y - 49
-        );
-    }
     ctx.fillStyle = "white";
 
     ctx.font = "20px Arial";
@@ -346,7 +312,7 @@ function drawArrow(from, to) {
     const endY =
         end.y + py + extraY;
     // recortar para no entrar dentro del nodo
-    const radius = 65;
+    const radius = 45;
 
     const lineStartX = startX + ux * radius;
     const lineStartY = startY + uy * radius;
@@ -360,12 +326,9 @@ function drawArrow(from, to) {
     ctx.moveTo(lineStartX, lineStartY);
     ctx.lineTo(lineEndX, lineEndY);
 
-    ctx.strokeStyle = "#145A32";
-    ctx.lineWidth = 24;
-    ctx.stroke();
+    ctx.strokeStyle = "#777";
+    ctx.lineWidth = 4;
 
-    ctx.strokeStyle = "#2ECC71";
-    ctx.lineWidth = 18;
     ctx.stroke();
 
     // dibujar flecha
@@ -587,7 +550,7 @@ function draw() {
     for (const name in nodes) {
         drawNode(name, nodes[name]);
     }
-    /*const now = Date.now();
+    const now = Date.now();
 
     for (
         let i = pendingStates.length - 1;
@@ -604,7 +567,7 @@ function draw() {
 
             pendingStates.splice(i, 1);
         }
-    }*/
+    }
         drawSnapshotPanel();
         requestAnimationFrame(draw);
 }
